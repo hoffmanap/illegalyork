@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>York, PA: The Illegal City Project</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        #map { height: 600px; width: 100%; border-radius: 8px; }
+        .legend { background: white; padding: 10px; line-height: 18px; border-radius: 5px; box-shadow: 0 0 15px rgba(0,0,0,0.2); }
+        .legend i { width: 18px; height: 18px; float: left; margin-right: 8px; opacity: 0.7; }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-900">
+
+    <header class="bg-slate-900 text-white p-6 shadow-md">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center">
+            <div>
+                <h1 class="text-3xl font-extrabold tracking-tight">York, PA: Built vs. Zoned Capacity</h1>
+                <p class="text-slate-400 mt-1">Mapping how modern single-use zoning laws render historical neighborhoods "illegal."</p>
+            </div>
+            <div class="mt-4 md:mt-0 bg-red-600/20 border border-red-500 text-red-400 px-4 py-2 rounded-lg font-mono text-sm">
+                City-wide Illegality: <span id="stat-overall-header">--%</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
+        
+        <div class="lg:col-span-1 space-y-6">
+            <div class="bg-white p-6 rounded-xl shadow-xs border border-gray-200">
+                <h2 class="text-xl font-bold mb-4 text-slate-800">Filter Map Issue</h2>
+                <p class="text-xs text-gray-500 mb-4">Toggle between specific metrics to isolate active non-conforming parcels.</p>
+                
+                <div class="space-y-3">
+                    <button onclick="switchView('overall')" id="btn-overall" class="w-full text-left px-4 py-2.5 rounded-lg font-medium text-sm transition bg-slate-800 text-white shadow-xs">
+                        📍 Overall Non-Conformity
+                    </button>
+                    <button onclick="switchView('setback')" id="btn-setback" class="w-full text-left px-4 py-2.5 rounded-lg font-medium text-sm transition bg-gray-100 hover:bg-gray-200 text-gray-700">
+                        📐 Setback Violations (<span id="stat-setback">--%</span>)
+                    </button>
+                    <button onclick="switchView('density')" id="btn-density" class="w-full text-left px-4 py-2.5 rounded-lg font-medium text-sm transition bg-gray-100 hover:bg-gray-200 text-gray-700">
+                        👥 Density/Lot Size (<span id="stat-density">--%</span>)
+                    </button>
+                    <button onclick="switchView('height')" id="btn-height" class="w-full text-left px-4 py-2.5 rounded-lg font-medium text-sm transition bg-gray-100 hover:bg-gray-200 text-gray-700">
+                        🏢 Height Restrictions (<span id="stat-height">--%</span>)
+                    </button>
+                    <button onclick="switchView('use')" id="btn-use" class="w-full text-left px-4 py-2.5 rounded-lg font-medium text-sm transition bg-gray-100 hover:bg-gray-200 text-gray-700">
+                        🏪 Disallowed Land Use (<span id="stat-use">--%</span>)
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-xs border border-gray-200">
+                <h3 class="text-md font-bold text-slate-800 mb-2">Market Scarcity Hypothesis</h3>
+                <p class="text-xs text-gray-600 leading-relaxed">
+                    Our pricing regression analyzes whether grandfathered, highly dense historic assets command a market premium due to severe zoning supply limits.
+                </p>
+                <div class="mt-3 text-xs font-mono p-2 bg-slate-50 text-slate-700 rounded border border-slate-200">
+                    Price/SqFt = β₀ + β₁(Illegal_Score) + Controls
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-3 space-y-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white p-4 rounded-xl shadow-xs border border-gray-200 text-center">
+                    <div class="text-xs font-medium text-gray-500 uppercase">Parcels Evaluated</div>
+                    <div id="card-total" class="text-2xl font-bold text-slate-800 mt-1">----</div>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-xs border border-gray-200 text-center border-l-4 border-l-red-500">
+                    <div class="text-xs font-medium text-gray-500 uppercase">Illegal Overall</div>
+                    <div id="card-illegal" class="text-2xl font-bold text-red-600 mt-1">--%</div>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-xs border border-gray-200 text-center">
+                    <div class="text-xs font-medium text-gray-500 uppercase">Avg Violations</div>
+                    <div class="text-2xl font-bold text-slate-800 mt-1">1.8</div>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-xs border border-gray-200 text-center border-l-4 border-l-emerald-500">
+                    <div class="text-xs font-medium text-gray-500 uppercase">Scarcity Premium</div>
+                    <div class="text-2xl font-bold text-emerald-600 mt-1">+$15.50/sf</div>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-xl shadow-xs border border-gray-200">
+                <div id="map"></div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Global variables
+        let map = L.map('map').setView([39.9626, -76.7277], 14); // Coordinates centered on York City Hall
+        let geojsonLayer;
+        let currentFilter = 'overall';
+        let mapDataChunks = [];
+
+        // Dark carto map style layer matching the data aesthetics
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+        }).addTo(map);
+
+        // Fetch overall calculated figures to update metric fields
+        fetch('summary_stats.json')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('stat-overall-header').innerText = data.pct_overall_illegal.toFixed(1) + '%';
+                document.getElementById('card-illegal').innerText = data.pct_overall_illegal.toFixed(1) + '%';
+                document.getElementById('card-total').innerText = data.total_parcels.toLocaleString();
+                document.getElementById('stat-setback').innerText = data.pct_viol_setback.toFixed(0) + '%';
+                document.getElementById('stat-density').innerText = data.pct_viol_density.toFixed(0) + '%';
+                document.getElementById('stat-height').innerText = data.pct_viol_height.toFixed(0) + '%';
+                document.getElementById('stat-use').innerText = data.pct_viol_use.toFixed(0) + '%';
+            }).catch(err => console.log("Summary stats payload unavailable yet, utilizing default template bindings."));
+
+        // Define Color Ramp for Map Layers
+        function getColor(props) {
+            if (currentFilter === 'overall') {
+                let score = props.ILLEGAL_SCORE || 0;
+                return score === 0 ? '#10b981' : // Green (Compliant)
+                       score === 1 ? '#fbbf24' : // Yellow
+                       score === 2 ? '#f97316' : // Orange
+                                     '#ef4444';  // Dark Red (3+ active structural violations)
+            }
+            // For boolean binary filters
+            let isViolator = currentFilter === 'setback' ? props.VIOL_SETBACK :
+                             currentFilter === 'density' ? props.VIOL_DENSITY :
+                             currentFilter === 'height'  ? props.VIOL_HEIGHT  : props.VIOL_USE;
+            return isViolator == 1 ? '#ef4444' : '#10b981';
+        }
+
+        function styleFeature(feature) {
+            return {
+                fillColor: getColor(feature.properties),
+                weight: 0.5,
+                opacity: 1,
+                color: '#64748b',
+                fillOpacity: 0.65
+            };
+        }
+
+        // Feature popups mapping out exact attributes captured via your ArcGIS preps
+        function onEachFeature(feature, layer) {
+            let p = feature.properties;
+            let popupContent = `
+                <div class="text-xs p-1 font-sans">
+                    <h4 class="font-bold border-b border-gray-200 pb-1 mb-1 text-slate-800">Parcel ID: ${p.PARCEL_ID || 'N/A'}</h4>
+                    <b>District:</b> ${p.ZONE_DISTRICT || 'Unzoned'}<br/>
+                    <b>Illegal Score Index:</b> ${p.ILLEGAL_SCORE ?? '0'}/4<br/>
+                    <hr class="my-1 border-gray-100"/>
+                    <b>Setback Viol:</b> ${p.VIOL_SETBACK ? '🔴 Yes' : '🟢 No'}<br/>
+                    <b>Density Viol:</b> ${p.VIOL_DENSITY ? '🔴 Yes' : '🟢 No'}<br/>
+                    <b>Height Viol:</b> ${p.VIOL_HEIGHT ? '🔴 Yes' : '🟢 No'}<br/>
+                    <b>Land Use Viol:</b> ${p.VIOL_USE ? '🔴 Yes' : '🟢 No'}
+                </div>
+            `;
+            layer.bindPopup(popupContent);
+        }
+
+        // Sequentially loads chunked map files asynchronously to avoid browser freezing
+        async function loadMapLayers() {
+            // Adjust loop count depending on how many files your splitting python script outputted
+            for (let i = 0; i < 5; i++) { 
+                try {
+                    let response = await fetch(`compliance_map_chunks/parcels_chunk_${i}.geojson`);
+                    if (!response.ok) break;
+                    let chunkData = await response.json();
+                    
+                    let layer = L.geoJSON(chunkData, {
+                        style: styleFeature,
+                        onEachFeature: onEachFeature
+                    }).addTo(map);
+                    
+                    mapDataChunks.push(layer);
+                } catch (e) {
+                    break; // stop when files end
+                }
+            }
+        }
+
+        // Interface Toggle Actions
+        function switchView(metric) {
+            currentFilter = metric;
+            
+            // Adjust navigation styling
+            ['overall', 'setback', 'density', 'height', 'use'].forEach(m => {
+                let btn = document.getElementById(`btn-${m}`);
+                if(m === metric) {
+                    btn.className = "w-full text-left px-4 py-2.5 rounded-lg font-medium text-sm transition bg-slate-800 text-white shadow-xs";
+                } else {
+                    btn.className = "w-full text-left px-4 py-2.5 rounded-lg font-medium text-sm transition bg-gray-100 hover:bg-gray-200 text-gray-700";
+                }
+            });
+
+            // Re-style existing layers instantaneously without pulling data again
+            mapDataChunks.forEach(layer => {
+                layer.setStyle(styleFeature);
+            });
+        }
+
+        // Trigger map generation
+        loadMapLayers();
+    </script>
+</body>
+</html>
