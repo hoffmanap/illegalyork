@@ -128,19 +128,22 @@
             attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
         }).addTo(map);
 
-        // Hydrate map summary components out of the analytics engine output payload
+        // Safely pull calculations map summary specs dictionary structure package
         fetch('summary_stats.json')
             .then(res => res.json())
             .then(data => {
-                document.getElementById('stat-overall-header').innerText = data.pct_overall_nonconforming.toFixed(1) + '%';
-                document.getElementById('card-illegal').innerText = data.pct_overall_nonconforming.toFixed(1) + '%';
-                document.getElementById('card-total').innerText = data.total_parcels.toLocaleString();
-                document.getElementById('stat-setback').innerText = data.pct_viol_setback.toFixed(0) + '%';
-                document.getElementById('stat-coverage').innerText = data.pct_viol_coverage.toFixed(0) + '%';
-                document.getElementById('stat-density').innerText = data.pct_viol_density.toFixed(0) + '%';
-                document.getElementById('stat-height').innerText = data.pct_viol_height.toFixed(1) + '%';
-                document.getElementById('stat-use').innerText = data.pct_viol_use.toFixed(1) + '%';
-            });
+                // Safeguard elements against potential initialization delay states
+                let overall = data.pct_overall_illegal !== undefined ? data.pct_overall_illegal : 0;
+                document.getElementById('stat-overall-header').innerText = overall.toFixed(1) + '%';
+                document.getElementById('card-illegal').innerText = overall.toFixed(1) + '%';
+                
+                document.getElementById('card-total').innerText = (data.total_parcels || 0).toLocaleString();
+                document.getElementById('stat-setback').innerText = (data.pct_viol_setback || 0).toFixed(0) + '%';
+                document.getElementById('stat-coverage').innerText = (data.pct_viol_coverage || 0).toFixed(0) + '%';
+                document.getElementById('stat-density').innerText = (data.pct_viol_density || 0).toFixed(0) + '%';
+                document.getElementById('stat-height').innerText = (data.pct_viol_height || 0).toFixed(1) + '%';
+                document.getElementById('stat-use').innerText = (data.pct_viol_use || 0).toFixed(1) + '%';
+            }).catch(e => console.error("Could not fetch summary data layout parameters.", e));
 
         function getWeight() {
             let z = map.getZoom();
@@ -162,7 +165,6 @@
         function styleFeature(feature) {
             let props = feature.properties;
             
-            // Filter Visibility Constraint: Hide compliant entries instantly on active filters
             if (currentFilter !== 'overall') {
                 let activeViol = currentFilter === 'setback'  ? props.V_SETBACK :
                                  currentFilter === 'coverage' ? props.V_COVERAGE :
@@ -204,18 +206,26 @@
             `);
         }
 
+        // Fail-safe loop handler to dynamically load available map slices
         async function loadMapLayers() {
-            for (let i = 0; i < 12; i++) {
+            let chunkIndex = 0;
+            while (chunkIndex < 25) { // Safe threshold guard cap limits
                 try {
-                    let response = await fetch(`compliance_map_chunks/parcels_chunk_${i}.geojson`);
-                    if (!response.ok) break;
+                    let response = await fetch(`compliance_map_chunks/parcels_chunk_${chunkIndex}.geojson`);
+                    if (!response.ok) {
+                        break; // Dynamically stops iteration when files end, avoiding 404 errors
+                    }
                     let chunkData = await response.json();
                     let layer = L.geoJSON(chunkData, {
                         style: styleFeature,
                         onEachFeature: onEachFeature
                     }).addTo(map);
+                    
                     mapDataChunks.push(layer);
-                } catch (e) { break; }
+                    chunkIndex++;
+                } catch (e) { 
+                    break; 
+                }
             }
             updateLegendDisplay();
         }
@@ -250,9 +260,11 @@
             currentFilter = metric;
             ['overall', 'use', 'height', 'setback', 'coverage', 'density'].forEach(m => {
                 let btn = document.getElementById(`btn-${m}`);
-                btn.className = m === metric ? 
-                    "w-full text-left px-4 py-3.5 rounded-xl font-bold text-sm transition-all bg-slate-900 text-white shadow-sm" : 
-                    "w-full text-left px-4 py-3.5 rounded-xl font-medium text-sm transition-all bg-slate-100 text-slate-700 hover:bg-slate-200";
+                if (btn) {
+                    btn.className = m === metric ? 
+                        "w-full text-left px-4 py-3.5 rounded-xl font-bold text-sm transition-all bg-slate-900 text-white shadow-sm" : 
+                        "w-full text-left px-4 py-3.5 rounded-xl font-medium text-sm transition-all bg-slate-100 text-slate-700 hover:bg-slate-200";
+                }
             });
 
             mapDataChunks.forEach(layer => { layer.setStyle(styleFeature); });
