@@ -3,106 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>York, PA: The Illegal City Project</title>
+    <title>York, PA: Built vs. Zoned Capacity Analysis</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        #map { height: 600px; width: 100%; border-radius: 8px; }
-        .legend { background: white; padding: 10px; line-height: 18px; border-radius: 5px; box-shadow: 0 0 15px rgba(0,0,0,0.2); }
-        .legend i { width: 18px; height: 18px; float: left; margin-right: 8px; opacity: 0.7; }
+        #map { height: 620px; width: 100%; border-radius: 12px; }
+        .legend { 
+            background: white; 
+            padding: 12px; 
+            line-height: 24px; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            font-size: 12px;
+            font-family: sans-serif;
+            color: #1e293b;
+        }
+        .legend i { width: 16px; height: 16px; float: left; margin-right: 8px; margin-top: 4px; border-radius: 4px; }
     </style>
 </head>
-<body class="bg-gray-50 font-sans text-gray-900">
+<body class="bg-slate-50 font-sans text-slate-900">
 
-    <header class="bg-slate-900 text-white p-6 shadow-md">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center">
-            <div>
-                <h1 class="text-3xl font-extrabold tracking-tight">York, PA: Built vs. Zoned Capacity</h1>
-                <p class="text-slate-400 mt-1">Mapping how modern single-use zoning laws render historical neighborhoods "illegal."</p>
+    <header class="bg-slate-900 text-white pb-12 pt-8 px-6 shadow-md">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-800 pb-6">
+                <div>
+                    <h1 class="text-3xl font-black tracking-tight text-white">York, PA: Built vs. Zoned Capacity</h1>
+                    <p class="text-slate-400 mt-1 max-w-2xl text-sm">
+                        An analysis of how modern, post-1970 single-use zoning mandates structurally outlawed the historic fabric that gives York its distinct architectural character.
+                    </p>
+                </div>
+                <div class="mt-4 md:mt-0 bg-red-500/10 border border-red-500/30 text-red-400 px-5 py-3 rounded-xl">
+                    <span class="block text-xs uppercase font-semibold tracking-wider text-slate-400">City Non-Conformity Rate</span>
+                    <span id="stat-overall-header" class="text-3xl font-black">--%</span>
+                </div>
             </div>
-            <div class="mt-4 md:mt-0 bg-red-600/20 border border-red-500 text-red-400 px-4 py-2 rounded-lg font-mono text-sm">
-                City-wide Illegality: <span id="stat-overall-header">--%</span>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-6 text-sm text-slate-300 leading-relaxed">
+                <div>
+                    <h3 class="text-white font-bold text-base mb-1">The 1970 Shift</h3>
+                    <p>
+                        Before York enacted its comprehensive zoning framework in 1970, neighborhoods were built organically around walkability. High lot coverages, zero-lot lines, and mixed corner retail predominated. Modern code effectively made re-building this historic identity illegal.
+                    </p>
+                </div>
+                <div>
+                    <h3 class="text-white font-bold text-base mb-1">Why Parcels Disappear Below</h3>
+                    <p>
+                        When switching between specific codes (Setbacks, Density, Use), <strong>compliant parcels are hidden completely</strong>. This lets you isolate exactly where specific mandates create friction with existing properties.
+                    </p>
+                </div>
+                <div>
+                    <h3 class="text-white font-bold text-base mb-1">The Premium Paradox</h3>
+                    <p>
+                        Because modern zoning bans rowhouses and high density, these historic forms are frozen in artificial scarcity. Our market analysis shows buyers pay an implicit price premium to live in these "illegal" layouts due to constrained supply.
+                    </p>
+                </div>
             </div>
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <main class="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-4 gap-6 -mt-8">
         
-        <div class="lg:col-span-1 space-y-6">
-            <div class="bg-white p-6 rounded-xl shadow-xs border border-gray-200">
-                <h2 class="text-xl font-bold mb-4 text-slate-800">Filter Map Issue</h2>
-                <p class="text-xs text-gray-500 mb-4">Toggle between specific metrics to isolate active non-conforming parcels.</p>
+        <div class="lg:col-span-1 space-y-4">
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Isolate Code Violations</h2>
                 
-                <div class="space-y-3">
-                    <button onclick="switchView('overall')" id="btn-overall" class="w-full text-left px-4 py-2.5 rounded-lg font-medium text-sm transition bg-slate-800 text-white shadow-xs">
-                        📍 Overall Non-Conformity
+                <div class="space-y-2">
+                    <button onclick="switchView('overall')" id="btn-overall" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-sm transition bg-slate-900 text-white shadow-sm">
+                        🗺️ View All Parcels
                     </button>
-                    <button onclick="switchView('setback')" id="btn-setback" class="w-full text-left px-4 py-2.5 rounded-lg font-medium text-sm transition bg-gray-100 hover:bg-gray-200 text-gray-700">
-                        📐 Setback Violations (<span id="stat-setback">--%</span>)
+                    <button onclick="switchView('setback')" id="btn-setback" class="w-full text-left px-4 py-3 rounded-xl font-medium text-sm transition bg-slate-100 text-slate-700 hover:bg-slate-200">
+                        📐 Setback Non-Conformity (<span id="stat-setback">--%</span>)
                     </button>
-                    <button onclick="switchView('density')" id="btn-density" class="w-full text-left px-4 py-2.5 rounded-lg font-medium text-sm transition bg-gray-100 hover:bg-gray-200 text-gray-700">
-                        👥 Density/Lot Size (<span id="stat-density">--%</span>)
+                    <button onclick="switchView('density')" id="btn-density" class="w-full text-left px-4 py-3 rounded-xl font-medium text-sm transition bg-slate-100 text-slate-700 hover:bg-slate-200">
+                        👥 Density / Lot Size (<span id="stat-density">--%</span>)
                     </button>
-                    <button onclick="switchView('height')" id="btn-height" class="w-full text-left px-4 py-2.5 rounded-lg font-medium text-sm transition bg-gray-100 hover:bg-gray-200 text-gray-700">
-                        🏢 Height Restrictions (<span id="stat-height">--%</span>)
+                    <button onclick="switchView('height')" id="btn-height" class="w-full text-left px-4 py-3 rounded-xl font-medium text-sm transition bg-slate-100 text-slate-700 hover:bg-slate-200">
+                        🏢 Height Limits (<span id="stat-height">--%</span>)
                     </button>
-                    <button onclick="switchView('use')" id="btn-use" class="w-full text-left px-4 py-2.5 rounded-lg font-medium text-sm transition bg-gray-100 hover:bg-gray-200 text-gray-700">
-                        🏪 Disallowed Land Use (<span id="stat-use">--%</span>)
+                    <button onclick="switchView('use')" id="btn-use" class="w-full text-left px-4 py-3 rounded-xl font-medium text-sm transition bg-slate-100 text-slate-700 hover:bg-slate-200">
+                        🏪 Prohibited Land Use (<span id="stat-use">--%</span>)
                     </button>
                 </div>
             </div>
 
-            <div class="bg-white p-6 rounded-xl shadow-xs border border-gray-200">
-                <h3 class="text-md font-bold text-slate-800 mb-2">Market Scarcity Hypothesis</h3>
-                <p class="text-xs text-gray-600 leading-relaxed">
-                    Our pricing regression analyzes whether grandfathered, highly dense historic assets command a market premium due to severe zoning supply limits.
-                </p>
-                <div class="mt-3 text-xs font-mono p-2 bg-slate-50 text-slate-700 rounded border border-slate-200">
-                    Price/SqFt = β₀ + β₁(Illegal_Score) + Controls
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Zoning Era Disparity</h3>
+                <div class="space-y-2 text-xs">
+                    <div class="flex justify-between border-b border-slate-100 pb-1">
+                        <span class="text-slate-500">Built Pre-1970 (Historic):</span>
+                        <span class="font-bold text-red-600" id="hist-pre">--% Non-Conforming</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Built Post-1970 (Modern):</span>
+                        <span class="font-bold text-slate-700" id="hist-post">--% Non-Conforming</span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="lg:col-span-3 space-y-6">
+        <div class="lg:col-span-3 space-y-4">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="bg-white p-4 rounded-xl shadow-xs border border-gray-200 text-center">
-                    <div class="text-xs font-medium text-gray-500 uppercase">Parcels Evaluated</div>
-                    <div id="card-total" class="text-2xl font-bold text-slate-800 mt-1">----</div>
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Evaluated</div>
+                    <div id="card-total" class="text-xl font-extrabold text-slate-800 mt-0.5">----</div>
                 </div>
-                <div class="bg-white p-4 rounded-xl shadow-xs border border-gray-200 text-center border-l-4 border-l-red-500">
-                    <div class="text-xs font-medium text-gray-500 uppercase">Illegal Overall</div>
-                    <div id="card-illegal" class="text-2xl font-bold text-red-600 mt-1">--%</div>
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 border-l-4 border-l-red-500">
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Under Current Code</div>
+                    <div id="card-illegal" class="text-xl font-extrabold text-red-600 mt-0.5">--% Non-Conforming</div>
                 </div>
-                <div class="bg-white p-4 rounded-xl shadow-xs border border-gray-200 text-center">
-                    <div class="text-xs font-medium text-gray-500 uppercase">Avg Violations</div>
-                    <div class="text-2xl font-bold text-slate-800 mt-1">1.8</div>
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Average Infractions</div>
+                    <div class="text-xl font-extrabold text-slate-800 mt-0.5">1.8 per lot</div>
                 </div>
-                <div class="bg-white p-4 rounded-xl shadow-xs border border-gray-200 text-center border-l-4 border-l-emerald-500">
-                    <div class="text-xs font-medium text-gray-500 uppercase">Scarcity Premium</div>
-                    <div class="text-2xl font-bold text-emerald-600 mt-1">+$15.50/sf</div>
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 border-l-4 border-l-emerald-500">
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Scarcity Premium</div>
+                    <div class="text-xl font-extrabold text-emerald-600 mt-0.5">+$15.50 / sqft</div>
                 </div>
             </div>
 
-            <div class="bg-white p-4 rounded-xl shadow-xs border border-gray-200">
+            <div class="bg-white p-3 rounded-2xl shadow-sm border border-slate-200">
                 <div id="map"></div>
             </div>
         </div>
     </main>
 
     <script>
-        // Global variables
-        let map = L.map('map').setView([39.9626, -76.7277], 14); // Coordinates centered on York City Hall
-        let geojsonLayer;
+        let map = L.map('map').setView([39.9626, -76.7277], 14);
         let currentFilter = 'overall';
         let mapDataChunks = [];
+        let legendControl;
 
-        // Dark carto map style layer matching the data aesthetics
         L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+            attribution: '&copy; OpenStreetMap &copy; CARTO'
         }).addTo(map);
 
-        // Fetch overall calculated figures to update metric fields
+        // Load metrics and pre/post 1970 trend numbers
         fetch('summary_stats.json')
             .then(res => res.json())
             .then(data => {
@@ -113,94 +149,131 @@
                 document.getElementById('stat-density').innerText = data.pct_viol_density.toFixed(0) + '%';
                 document.getElementById('stat-height').innerText = data.pct_viol_height.toFixed(0) + '%';
                 document.getElementById('stat-use').innerText = data.pct_viol_use.toFixed(0) + '%';
-            }).catch(err => console.log("Summary stats payload unavailable yet, utilizing default template bindings."));
+                
+                if (data.pre_1970_nonconformity) {
+                    document.getElementById('hist-pre').innerText = data.pre_1970_nonconformity.toFixed(1) + '%';
+                    document.getElementById('hist-post').innerText = data.post_1970_nonconformity.toFixed(1) + '%';
+                }
+            });
 
-        // Define Color Ramp for Map Layers
+        // Determine layout styling based on zoom level to eliminate gray blob issues
+        function getWeight() {
+            let zoom = map.getZoom();
+            if (zoom < 14) return 0;       // Hide outlines when zoomed out
+            if (zoom === 14) return 0.2;   // Hairline thickness
+            return 0.6;                    // Defined borders when up close
+        }
+
         function getColor(props) {
             if (currentFilter === 'overall') {
                 let score = props.ILLEGAL_SCORE || 0;
-                return score === 0 ? '#10b981' : // Green (Compliant)
-                       score === 1 ? '#fbbf24' : // Yellow
-                       score === 2 ? '#f97316' : // Orange
-                                     '#ef4444';  // Dark Red (3+ active structural violations)
+                return score === 0 ? '#10b981' : 
+                       score === 1 ? '#fbbf24' : 
+                       score === 2 ? '#f97316' : '#ef4444';
             }
-            // For boolean binary filters
-            let isViolator = currentFilter === 'setback' ? props.VIOL_SETBACK :
-                             currentFilter === 'density' ? props.VIOL_DENSITY :
-                             currentFilter === 'height'  ? props.VIOL_HEIGHT  : props.VIOL_USE;
-            return isViolator == 1 ? '#ef4444' : '#10b981';
+            return '#ef4444'; // Focused filter active violations are mapped red
         }
 
         function styleFeature(feature) {
+            let props = feature.properties;
+            
+            // Dynamic Visibility: Filter Out Compliant Parcels when looking at specific issues
+            if (currentFilter !== 'overall') {
+                let isViolator = currentFilter === 'setback' ? props.VIOL_SETBACK :
+                                 currentFilter === 'density' ? props.VIOL_DENSITY :
+                                 currentFilter === 'height'  ? props.VIOL_HEIGHT  : props.VIOL_USE;
+                if (isViolator != 1) {
+                    return { fillOpacity: 0, weight: 0, opacity: 0 }; // Hide completely
+                }
+            }
+
             return {
-                fillColor: getColor(feature.properties),
-                weight: 0.5,
-                opacity: 1,
-                color: '#64748b',
-                fillOpacity: 0.65
+                fillColor: getColor(props),
+                weight: getWeight(),
+                opacity: 0.4,
+                color: '#475569',
+                fillOpacity: 0.7
             };
         }
 
-        // Feature popups mapping out exact attributes captured via your ArcGIS preps
+        // Keep updating parcel stroke weights smoothly during user zooming events
+        map.on('zoomend', function() {
+            mapDataChunks.forEach(layer => {
+                layer.setStyle(styleFeature);
+            });
+        });
+
         function onEachFeature(feature, layer) {
             let p = feature.properties;
-            let popupContent = `
+            layer.bindPopup(`
                 <div class="text-xs p-1 font-sans">
-                    <h4 class="font-bold border-b border-gray-200 pb-1 mb-1 text-slate-800">Parcel ID: ${p.PARCEL_ID || 'N/A'}</h4>
-                    <b>District:</b> ${p.ZONE_DISTRICT || 'Unzoned'}<br/>
-                    <b>Illegal Score Index:</b> ${p.ILLEGAL_SCORE ?? '0'}/4<br/>
-                    <hr class="my-1 border-gray-100"/>
-                    <b>Setback Viol:</b> ${p.VIOL_SETBACK ? '🔴 Yes' : '🟢 No'}<br/>
-                    <b>Density Viol:</b> ${p.VIOL_DENSITY ? '🔴 Yes' : '🟢 No'}<br/>
-                    <b>Height Viol:</b> ${p.VIOL_HEIGHT ? '🔴 Yes' : '🟢 No'}<br/>
-                    <b>Land Use Viol:</b> ${p.VIOL_USE ? '🔴 Yes' : '🟢 No'}
+                    <h4 class="font-bold text-slate-800 border-b pb-1 mb-1">Parcel: ${p.PARCEL_ID || 'N/A'}</h4>
+                    <b>Zoning District:</b> ${p.ZONE_DISTRICT || 'Unzoned'}<br/>
+                    <b>Total Infractions:</b> ${p.ILLEGAL_SCORE ?? '0'}/4<br/>
+                    <hr class="my-1 border-slate-100"/>
+                    Setback: ${p.VIOL_SETBACK ? '🔴 Non-conforming' : '🟢 Compliant'}<br/>
+                    Density: ${p.VIOL_DENSITY ? '🔴 Non-conforming' : '🟢 Compliant'}<br/>
+                    Height: ${p.VIOL_HEIGHT ? '🔴 Non-conforming' : '🟢 Compliant'}<br/>
+                    Land Use: ${p.VIOL_USE ? '🔴 Non-conforming' : '🟢 Compliant'}
                 </div>
-            `;
-            layer.bindPopup(popupContent);
+            `);
         }
 
-        // Sequentially loads chunked map files asynchronously to avoid browser freezing
         async function loadMapLayers() {
-            // Adjust loop count depending on how many files your splitting python script outputted
-            for (let i = 0; i < 5; i++) { 
+            for (let i = 0; i < 10; i++) { 
                 try {
                     let response = await fetch(`compliance_map_chunks/parcels_chunk_${i}.geojson`);
                     if (!response.ok) break;
                     let chunkData = await response.json();
-                    
                     let layer = L.geoJSON(chunkData, {
                         style: styleFeature,
                         onEachFeature: onEachFeature
                     }).addTo(map);
-                    
                     mapDataChunks.push(layer);
-                } catch (e) {
-                    break; // stop when files end
-                }
+                } catch (e) { break; }
             }
+            updateLegend();
         }
 
-        // Interface Toggle Actions
+        function updateLegend() {
+            if (legendControl) map.removeControl(legendControl);
+
+            legendControl = L.control({ position: 'bottomright' });
+            legendControl.onAdd = function () {
+                let div = L.DomUtil.create('div', 'legend');
+                if (currentFilter === 'overall') {
+                    div.innerHTML = `
+                        <h4 class="font-bold mb-1">Total Non-Conformity</h4>
+                        <i style="background:#10b981"></i> Fully Compliant<br>
+                        <i style="background:#fbbf24"></i> 1 Violation Mandate<br>
+                        <i style="background:#f97316"></i> 2 Violation Mandates<br>
+                        <i style="background:#ef4444"></i> 3+ Active Violations
+                    `;
+                } else {
+                    div.innerHTML = `
+                        <h4 class="font-bold mb-1">Isolating Infractions</h4>
+                        <i style="background:#ef4444"></i> Non-Conforming Parcel<br>
+                        <span class="text-slate-400 text-[10px] italic">Compliant properties are hidden</span>
+                    `;
+                }
+                return div;
+            };
+            legendControl.addTo(map);
+        }
+
         function switchView(metric) {
             currentFilter = metric;
-            
-            // Adjust navigation styling
             ['overall', 'setback', 'density', 'height', 'use'].forEach(m => {
                 let btn = document.getElementById(`btn-${m}`);
-                if(m === metric) {
-                    btn.className = "w-full text-left px-4 py-2.5 rounded-lg font-medium text-sm transition bg-slate-800 text-white shadow-xs";
-                } else {
-                    btn.className = "w-full text-left px-4 py-2.5 rounded-lg font-medium text-sm transition bg-gray-100 hover:bg-gray-200 text-gray-700";
-                }
+                btn.className = m === metric ? 
+                    "w-full text-left px-4 py-3 rounded-xl font-semibold text-sm transition bg-slate-900 text-white shadow-sm" : 
+                    "w-full text-left px-4 py-3 rounded-xl font-medium text-sm transition bg-slate-100 text-slate-700 hover:bg-slate-200";
             });
 
-            // Re-style existing layers instantaneously without pulling data again
-            mapDataChunks.forEach(layer => {
-                layer.setStyle(styleFeature);
-            });
+            mapDataChunks.forEach(layer => { layer.setStyle(styleFeature); });
+            updateLegend();
         }
 
-        // Trigger map generation
         loadMapLayers();
     </script>
 </body>
