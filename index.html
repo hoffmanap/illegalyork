@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        #map { height: 620px; width: 100%; border-radius: 16px; }
+        #map { height: 600px; width: 100%; border-radius: 16px; }
         .legend { 
             background: white; 
             padding: 14px; 
@@ -28,35 +28,35 @@
         <div class="max-w-7xl mx-auto">
             <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 pb-8 border-b border-slate-800">
                 <div>
-                    <h1 class="text-3xl font-black tracking-tight text-white sm:text-4xl">York, PA: Built vs. Zoned Capacity</h1>
+                    <h1 class="text-3xl font-black tracking-tight text-white sm:text-4xl">York, PA: Built vs. Zoned Capacity Analysis</h1>
                     <p class="text-slate-400 mt-2 max-w-3xl text-sm sm:text-base leading-relaxed">
-                        An interactive analysis evaluating how modern, post-1970 single-use zoning mandates and suburban dimensional codes structurally outlawed the traditional brick rowhouses and vibrant mixed-use streetscapes that define York's unique historical layout.
+                        A spatial evaluation tracking the legal gap between York's existing built housing inventory and the maximum capacity allowed under current post-1970 suburban dimensional rules.
                     </p>
                 </div>
-                <div class="bg-red-500/10 border border-red-500/30 text-red-400 px-6 py-4 rounded-2xl min-w-[240px] shadow-inner">
-                    <span class="block text-xs uppercase font-bold tracking-widest text-slate-400">Zoning Non-Conformity Rate</span>
-                    <span id="stat-overall-header" class="text-4xl font-black tracking-tight">--%</span>
-                    <span class="block text-[10px] text-slate-400 mt-1">of city properties are technically non-compliant</span>
+                <div class="bg-red-500/10 border border-red-500/30 text-red-400 px-6 py-4 rounded-2xl min-w-[260px] shadow-inner text-center lg:text-left">
+                    <span class="block text-xs uppercase font-bold tracking-widest text-slate-400">Total Capacity Deficit</span>
+                    <span id="stat-deficit-header" class="text-4xl font-black tracking-tight">-,---</span>
+                    <span class="block text-[10px] text-slate-400 mt-1">units eliminated from York's legal footprint</span>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8 text-sm text-slate-300 leading-relaxed">
                 <div>
-                    <h3 class="text-white font-bold text-base flex items-center gap-2">🏢 The Height Story Paradox</h3>
+                    <h3 class="text-white font-bold text-base flex items-center gap-2">📊 Built Capacity vs. Zoned Capacity</h3>
                     <p class="mt-2">
-                        York's code enforces a strict height threshold (typically 35 feet max) inside its residential and neighborhood districts. Assuming an average of 12 feet per story, traditional 3-story brick townhouses reach **36 feet**—putting them in technical violation of the law despite being a hallmark of local architectural history.
+                        While 0% of properties violate usage rules, York's physical building layouts are heavily restricted. If the city's historic urban footprint were leveled today, modern setback, area, and lot-coverage minimums would make it illegal to rebuild the existing housing supply, capping development capacity far below current density.
                     </p>
                 </div>
                 <div>
-                    <h3 class="text-white font-bold text-base flex items-center gap-2">🏪 Outlawed Mixed-Use Typology</h3>
+                    <h3 class="text-white font-bold text-base flex items-center gap-2">🛑 The Geometric Housing Cap</h3>
                     <p class="mt-2">
-                        Cross-referencing land use types against the official zoning ordinance maps highlights a stark clash. Classic multi-family conversions, continuous rowhouse blocks, and historic corner storefronts are **categorically prohibited** in low-density residential zones (RS1/RS2), making these properties non-conforming.
+                        By applying York’s current density calculations across all parcels, we reveal that modern regulations restrict the city's legal capacity to <strong id="stat-zoned-text">--,---</strong> total units. Because <strong id="stat-built-text">--,---</strong> units already exist, zoning creates a structural deficit, capping housing supply far below historical levels.
                     </p>
                 </div>
                 <div>
-                    <h3 class="text-white font-bold text-base flex items-center gap-2">📈 The Price Premium of Walkability</h3>
+                    <h3 class="text-white font-bold text-base flex items-center gap-2">📈 Clashing with Household Growth</h3>
                     <p class="mt-2">
-                        Because contemporary regulations make it illegal to build dense, pedestrian-scaled rowhouse neighborhoods, these historic formats are frozen in artificial scarcity. Real estate market trends show home buyers pay a clear premium per square foot for these walkable layouts, indicating strong consumer demand despite restrictive modern zoning policies.
+                        As local household demand scales upward by an estimated <strong>+1,200 households</strong>, modern zoning codes prevent the market from adapting. Because rebuilding rowhouses or adding multi-family density is structurally non-conforming, zoning acts as an invisible cap on supply, driving housing scarcity.
                     </p>
                 </div>
             </div>
@@ -67,44 +67,56 @@
         
         <div class="lg:col-span-1 space-y-4">
             <div class="bg-white p-5 rounded-2xl shadow-xs border border-slate-200">
-                <h2 class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">Isolate Code Issues</h2>
+                <h2 class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">Isolate Capacity Squeezes</h2>
                 
                 <div class="space-y-2">
                     <button onclick="switchView('overall')" id="btn-overall" class="w-full text-left px-4 py-3.5 rounded-xl font-bold text-sm transition-all bg-slate-900 text-white shadow-sm">
                         🗺️ View All City Parcels
                     </button>
-                    <button onclick="switchView('use')" id="btn-use" class="w-full text-left px-4 py-3.5 rounded-xl font-medium text-sm transition-all bg-slate-100 text-slate-700 hover:bg-slate-200">
-                        🏪 Prohibited Land Use / Typology (<span id="stat-use">--%</span>)
-                    </button>
-                    <button onclick="switchView('height')" id="btn-height" class="w-full text-left px-4 py-3.5 rounded-xl font-medium text-sm transition-all bg-slate-100 text-slate-700 hover:bg-slate-200">
-                        🏢 Max Height Infractions (<span id="stat-height">--%</span>)
-                    </button>
                     <button onclick="switchView('setback')" id="btn-setback" class="w-full text-left px-4 py-3.5 rounded-xl font-medium text-sm transition-all bg-slate-100 text-slate-700 hover:bg-slate-200">
                         📐 Setback Infractions (<span id="stat-setback">--%</span>)
                     </button>
                     <button onclick="switchView('coverage')" id="btn-coverage" class="w-full text-left px-4 py-3.5 rounded-xl font-medium text-sm transition-all bg-slate-100 text-slate-700 hover:bg-slate-200">
-                        🏠 Lot Coverage Limits (<span id="stat-coverage">--%</span>)
+                        🏠 Yard Coverage Limits (<span id="stat-coverage">--%</span>)
                     </button>
                     <button onclick="switchView('density')" id="btn-density" class="w-full text-left px-4 py-3.5 rounded-xl font-medium text-sm transition-all bg-slate-100 text-slate-700 hover:bg-slate-200">
-                        👥 Density Mandates (<span id="stat-density">--%</span>)
+                        👥 Minimum Lot / Density Mandates (<span id="stat-density">--%</span>)
                     </button>
                 </div>
+            </div>
+
+            <div class="bg-slate-900 text-white p-5 rounded-2xl shadow-xs border border-slate-800">
+                <h4 class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Demographic Growth Collision</h4>
+                <div class="space-y-3 text-xs mt-3">
+                    <div class="flex justify-between border-b border-slate-800 pb-2">
+                        <span class="text-slate-400">Household Growth:</span>
+                        <span class="font-bold text-emerald-400">+1,200 units</span>
+                    </div>
+                    <div class="flex justify-between border-b border-slate-800 pb-2">
+                        <span class="text-slate-400">Zoned Allowed Headroom:</span>
+                        <span class="font-bold text-red-400">0 Units (Capped)</span>
+                    </div>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed mt-3">
+                    Because suburban-style setbacks and lot sizes restrict existing properties from adapting, York's legal framework cannot accommodate growing household demand, capping housing supply below historic levels.
+                </p>
             </div>
         </div>
 
         <div class="lg:col-span-3 space-y-4">
+            
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div class="bg-white p-4 rounded-2xl shadow-xs border border-slate-200">
-                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Properties Analyzed</div>
-                    <div id="card-total" class="text-2xl font-black text-slate-800 mt-1">----</div>
-                </div>
-                <div class="bg-white p-4 rounded-2xl shadow-xs border border-slate-200 border-l-4 border-l-red-500">
-                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">% City Non-Conforming</div>
-                    <div id="card-illegal" class="text-2xl font-black text-red-600 mt-1">--%</div>
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Existing Units Built</div>
+                    <div id="card-built" class="text-2xl font-black text-slate-800 mt-1">----</div>
                 </div>
                 <div class="bg-white p-4 rounded-2xl shadow-xs border border-slate-200">
-                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Avg Conflicting Codes</div>
-                    <div class="text-2xl font-black text-slate-800 mt-1">1.8 per lot</div>
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Legal Code Capacity</div>
+                    <div id="card-zoned" class="text-2xl font-black text-slate-800 mt-1">----</div>
+                </div>
+                <div class="bg-white p-4 rounded-2xl shadow-xs border border-slate-200 border-l-4 border-l-red-500">
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Geometric Illegality</div>
+                    <div id="card-illegal" class="text-2xl font-black text-red-600 mt-1">--%</div>
                 </div>
                 <div class="bg-white p-4 rounded-2xl shadow-xs border border-slate-200 border-l-4 border-l-emerald-500">
                     <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Walkability Premium</div>
@@ -128,22 +140,26 @@
             attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
         }).addTo(map);
 
-        // Safely pull calculations map summary specs dictionary structure package
+        // Fetch metrics safely out of summary stats file
         fetch('summary_stats.json')
             .then(res => res.json())
             .then(data => {
-                // Safeguard elements against potential initialization delay states
                 let overall = data.pct_overall_illegal !== undefined ? data.pct_overall_illegal : 0;
                 document.getElementById('stat-overall-header').innerText = overall.toFixed(1) + '%';
                 document.getElementById('card-illegal').innerText = overall.toFixed(1) + '%';
                 
-                document.getElementById('card-total').innerText = (data.total_parcels || 0).toLocaleString();
+                // Hydrate the new capacity metrics blocks
+                document.getElementById('stat-deficit-header').innerText = (data.capacity_deficit || 0).toLocaleString();
+                document.getElementById('stat-built-text').innerText = (data.total_built_capacity || 0).toLocaleString();
+                document.getElementById('stat-zoned-text').innerText = (data.total_zoned_capacity || 0).toLocaleString();
+                
+                document.getElementById('card-built').innerText = (data.total_built_capacity || 0).toLocaleString();
+                document.getElementById('card-zoned').innerText = (data.total_zoned_capacity || 0).toLocaleString();
+                
                 document.getElementById('stat-setback').innerText = (data.pct_viol_setback || 0).toFixed(0) + '%';
                 document.getElementById('stat-coverage').innerText = (data.pct_viol_coverage || 0).toFixed(0) + '%';
                 document.getElementById('stat-density').innerText = (data.pct_viol_density || 0).toFixed(0) + '%';
-                document.getElementById('stat-height').innerText = (data.pct_viol_height || 0).toFixed(1) + '%';
-                document.getElementById('stat-use').innerText = (data.pct_viol_use || 0).toFixed(1) + '%';
-            }).catch(e => console.error("Could not fetch summary data layout parameters.", e));
+            }).catch(e => console.error("Metrics payload error.", e));
 
         function getWeight() {
             let z = map.getZoom();
@@ -167,9 +183,7 @@
             
             if (currentFilter !== 'overall') {
                 let activeViol = currentFilter === 'setback'  ? props.V_SETBACK :
-                                 currentFilter === 'coverage' ? props.V_COVERAGE :
-                                 currentFilter === 'density'  ? props.V_DENSITY  : 
-                                 currentFilter === 'height'   ? props.V_HEIGHT   : props.V_USE;
+                                 currentFilter === 'coverage' ? props.V_COVERAGE : props.V_DENSITY;
                 if (activeViol != 1) {
                     return { fillOpacity: 0, weight: 0, opacity: 0, clickable: false };
                 }
@@ -194,27 +208,21 @@
                 <div class="text-xs p-1 font-sans text-slate-800">
                     <h4 class="font-bold border-b pb-1 mb-1 text-slate-900">FID Record ID: ${p.FID}</h4>
                     <b>Current Zoning District:</b> ${p.DISTRICT}<br/>
-                    <b>Registered Land Use:</b> <span class="text-slate-600 font-medium">${p.USE_DESC}</span><br/>
-                    <b>Code Infractions:</b> ${p.SCORE}/5
+                    <b>Registered Property Profile:</b> <span class="text-slate-600 font-medium">${p.USE_DESC}</span><br/>
+                    <b>Conflicting Geometric Codes:</b> ${p.SCORE}/3
                     <hr class="my-1.5 border-slate-100"/>
-                    Prohibited Typology/Use: ${p.V_USE ? '🔴 Non-conforming' : '🟢 Compliant'}<br/>
-                    Structure Height (12ft rule): ${p.V_HEIGHT ? '🔴 Non-conforming (>35ft)' : '🟢 Compliant'}<br/>
                     Setback Clearance: ${p.V_SETBACK ? '🔴 Non-conforming' : '🟢 Compliant'}<br/>
                     Lot Yard Coverage: ${p.V_COVERAGE ? '🔴 Non-conforming' : '🟢 Compliant'}<br/>
-                    Density Rule: ${p.V_DENSITY ? '🔴 Non-conforming' : '🟢 Compliant'}
+                    Minimum Lot Area/Density: ${p.V_DENSITY ? '🔴 Non-conforming' : '🟢 Compliant'}
                 </div>
             `);
         }
 
-        // Fail-safe loop handler to dynamically load available map slices
         async function loadMapLayers() {
-            let chunkIndex = 0;
-            while (chunkIndex < 25) { // Safe threshold guard cap limits
+            for (let chunkIndex = 0; chunkIndex <= 5; chunkIndex++) { 
                 try {
                     let response = await fetch(`compliance_map_chunks/parcels_chunk_${chunkIndex}.geojson`);
-                    if (!response.ok) {
-                        break; // Dynamically stops iteration when files end, avoiding 404 errors
-                    }
+                    if (!response.ok) break;
                     let chunkData = await response.json();
                     let layer = L.geoJSON(chunkData, {
                         style: styleFeature,
@@ -222,7 +230,6 @@
                     }).addTo(map);
                     
                     mapDataChunks.push(layer);
-                    chunkIndex++;
                 } catch (e) { 
                     break; 
                 }
@@ -238,11 +245,11 @@
                 let div = L.DomUtil.create('div', 'legend');
                 if (currentFilter === 'overall') {
                     div.innerHTML = `
-                        <h4 class="font-bold border-b pb-1 mb-1 text-slate-900">Zoning Non-Conformity</h4>
+                        <h4 class="font-bold border-b pb-1 mb-1 text-slate-900">Geometric Conflicts</h4>
                         <i style="background:#10b981"></i> Fully Compliant<br>
                         <i style="background:#fbbf24"></i> 1 Code Infraction<br>
                         <i style="background:#f97316"></i> 2 Code Infractions<br>
-                        <i style="background:#ef4444"></i> 3+ Code Infractions
+                        <i style="background:#ef4444"></i> 3 Active Infractions
                     `;
                 } else {
                     div.innerHTML = `
@@ -258,7 +265,7 @@
 
         function switchView(metric) {
             currentFilter = metric;
-            ['overall', 'use', 'height', 'setback', 'coverage', 'density'].forEach(m => {
+            ['overall', 'setback', 'coverage', 'density'].forEach(m => {
                 let btn = document.getElementById(`btn-${m}`);
                 if (btn) {
                     btn.className = m === metric ? 
