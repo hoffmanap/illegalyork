@@ -30,13 +30,13 @@
                 <div>
                     <h1 class="text-3xl font-black tracking-tight text-white sm:text-4xl">York, PA: Built vs. Zoned Capacity Analysis</h1>
                     <p class="text-slate-400 mt-2 max-w-3xl text-sm sm:text-base leading-relaxed">
-                        A spatial evaluation tracking the legal gap between York's existing built housing inventory and the maximum capacity allowed under current suburban dimensional rules.
+                        A spatial evaluation tracking the alignment between York's historic urban footprint and modern suburban dimensional rules.
                     </p>
                 </div>
-                <div class="bg-red-500/10 border border-red-500/30 text-red-400 px-6 py-4 rounded-2xl min-w-[240px] shadow-inner text-center lg:text-left">
-                    <span class="block text-xs uppercase font-bold tracking-widest text-slate-400">Total Capacity Deficit</span>
-                    <span id="stat-deficit-header" class="text-4xl font-black tracking-tight">-,---</span>
-                    <span class="block text-[10px] text-slate-400 mt-1">units eliminated from York's legal footprint</span>
+                <div class="bg-blue-500/10 border border-blue-500/30 text-blue-400 px-6 py-4 rounded-2xl min-w-[240px] shadow-inner text-center lg:text-left">
+                    <span class="block text-xs uppercase font-bold tracking-widest text-slate-400">City Geometric Conflict Rate</span>
+                    <span id="stat-overall-header" class="text-4xl font-black tracking-tight">--%</span>
+                    <span class="block text-[10px] text-slate-400 mt-1">of city properties violate modern spatial math</span>
                 </div>
             </div>
 
@@ -44,19 +44,19 @@
                 <div>
                     <h3 class="text-white font-bold text-base flex items-center gap-2">📊 Built Capacity vs. Zoned Capacity</h3>
                     <p class="mt-2">
-                        While 0% of properties violate usage rules, York's physical building layouts are heavily restricted. If the city's historic urban footprint were leveled today, modern setback, area, and lot-coverage minimums would make it illegal to rebuild the existing housing supply, capping development capacity far below current density.
+                        Our citywide evaluation reveals a striking insight: <strong>0% of York's properties violate land-use compatibility rules.</strong> Multi-family homes, rowhouses, and neighborhood storefronts operate within legally permitted zoning boundaries. The friction is entirely geometric, not operational.
                     </p>
                 </div>
                 <div>
                     <h3 class="text-white font-bold text-base flex items-center gap-2">🛑 The Geometric Housing Cap</h3>
                     <p class="mt-2">
-                        By applying York’s current density calculations across all parcels, we reveal that modern regulations restrict the city's legal capacity to <strong id="stat-zoned-text">--,---</strong> total units. Because <strong id="stat-built-text">--,---</strong> units already exist, zoning creates a structural deficit, capping housing supply far below historical levels.
+                        While the modern code theoretically permits up to <strong id="stat-zoned-text">--,---</strong> total units citywide by allowing extreme density on a few commercial lots, it heavily restricts York's true residential fabric. In neighborhood zones, modern setback, area, and lot-coverage minimums make it illegal to replicate or build new traditional rowhouse footprints.
                     </p>
                 </div>
                 <div>
                     <h3 class="text-white font-bold text-base flex items-center gap-2">📈 Clashing with Household Growth</h3>
                     <p class="mt-2">
-                        As local household demand scales upward by an estimated <strong>+1,200 households</strong>, modern zoning codes prevent the market from adapting. Because rebuilding rowhouses or adding multi-family density is structurally non-conforming, zoning acts as an invisible cap on supply, driving housing scarcity.
+                        As local housing demand scales upward by an estimated <strong>+1,200 households</strong>, modern suburban dimensional rules prevent existing residential blocks from organically adapting. Because building pedestrian-scaled housing densities is non-conforming, zoning acts as an invisible cap on supply where it is needed most.
                     </p>
                 </div>
             </div>
@@ -93,33 +93,29 @@
                         <span class="font-bold text-emerald-400">+1,200 units</span>
                     </div>
                     <div class="flex justify-between border-b border-slate-800 pb-2">
-                        <span class="text-slate-400">Zoned Allowed Headroom:</span>
-                        <span class="font-bold text-red-400">0 Units (Capped)</span>
+                        <span class="text-slate-400">Neighborhood Headroom:</span>
+                        <span class="font-bold text-red-400">Restricted</span>
                     </div>
                 </div>
                 <p class="text-[11px] text-slate-400 leading-relaxed mt-3">
-                    Because suburban-style setbacks and lot sizes restrict existing properties from adapting, York's legal framework cannot accommodate growing household demand, capping housing supply below historic levels.
+                    Because suburban setbacks and large lot minimums restrict neighborhood boundaries from expanding, York's legal framework struggles to accommodate localized household growth.
                 </p>
             </div>
         </div>
 
         <div class="lg:col-span-3 space-y-4">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <div class="bg-white p-4 rounded-2xl shadow-xs border border-slate-200">
                     <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Existing Units Built</div>
                     <div id="card-built" class="text-2xl font-black text-slate-800 mt-1">----</div>
                 </div>
                 <div class="bg-white p-4 rounded-2xl shadow-xs border border-slate-200">
-                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Legal Code Capacity</div>
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Theoretical Capacity</div>
                     <div id="card-zoned" class="text-2xl font-black text-slate-800 mt-1">----</div>
                 </div>
                 <div class="bg-white p-4 rounded-2xl shadow-xs border border-slate-200 border-l-4 border-l-red-500">
-                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Geometric Illegality</div>
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Geometric Illegality Rate</div>
                     <div id="card-illegal" class="text-2xl font-black text-red-600 mt-1">--%</div>
-                </div>
-                <div class="bg-white p-4 rounded-2xl shadow-xs border border-slate-200 border-l-4 border-l-emerald-500">
-                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Walkability Premium</div>
-                    <div class="text-2xl font-black text-emerald-600 mt-1">+$15.50 / sf</div>
                 </div>
             </div>
 
@@ -139,7 +135,7 @@
             attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
         }).addTo(map);
 
-        // Fail-safe safe element hydration routine
+        // Crash-proof text helper function
         function safeSetText(id, text) {
             let el = document.getElementById(id);
             if (el) el.innerText = text;
@@ -153,8 +149,6 @@
                 safeSetText('stat-overall-header', overall.toFixed(1) + '%');
                 safeSetText('card-illegal', overall.toFixed(1) + '%');
                 
-                safeSetText('stat-deficit-header', (data.capacity_deficit || 0).toLocaleString());
-                safeSetText('stat-built-text', (data.total_built_capacity || 0).toLocaleString());
                 safeSetText('stat-zoned-text', (data.total_zoned_capacity || 0).toLocaleString());
                 
                 safeSetText('card-built', (data.total_built_capacity || 0).toLocaleString());
@@ -257,7 +251,6 @@
                     `;
                 } else {
                     div.innerHTML = `
-                        <h4 class="font-bold mb-1 text-slate-900">Isolating Infractions</h4>
                         <i style="background:#ef4444"></i> Non-Conforming Property<br>
                         <span class="text-slate-400 text-[10px] italic block mt-1">Compliant properties are hidden</span>
                     `;
