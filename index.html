@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        #map { height: 600px; width: 100%; border-radius: 16px; }
+        #map { height: 620px; width: 100%; border-radius: 16px; }
         .legend { 
             background: white; 
             padding: 14px; 
@@ -30,33 +30,33 @@
                 <div>
                     <h1 class="text-3xl font-black tracking-tight text-white sm:text-4xl">York, PA: Built vs. Zoned Capacity Analysis</h1>
                     <p class="text-slate-400 mt-2 max-w-3xl text-sm sm:text-base leading-relaxed">
-                        A spatial evaluation tracking the alignment between York's historic urban footprint and modern suburban dimensional rules.
+                        An interactive evaluation analyzing how modern suburban dimensional overlays artificially restrict and misallocate development capacity across York's historic footprint.
                     </p>
                 </div>
-                <div class="bg-blue-500/10 border border-blue-500/30 text-blue-400 px-6 py-4 rounded-2xl min-w-[240px] shadow-inner text-center lg:text-left">
-                    <span class="block text-xs uppercase font-bold tracking-widest text-slate-400">City Geometric Conflict Rate</span>
-                    <span id="stat-overall-header" class="text-4xl font-black tracking-tight">--%</span>
-                    <span class="block text-[10px] text-slate-400 mt-1">of city properties violate modern spatial math</span>
+                <div class="bg-red-500/10 border border-red-500/30 text-red-400 px-6 py-4 rounded-2xl min-w-[260px] shadow-inner text-center lg:text-left">
+                    <span class="block text-xs uppercase font-bold tracking-widest text-slate-400">Neighborhood Unit Deficit</span>
+                    <span id="stat-deficit-header" class="text-4xl font-black tracking-tight">-,---</span>
+                    <span class="block text-[10px] text-slate-400 mt-1">units outlawed inside residential zones</span>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8 text-sm text-slate-300 leading-relaxed">
                 <div>
-                    <h3 class="text-white font-bold text-base flex items-center gap-2">📊 Built Capacity vs. Zoned Capacity</h3>
+                    <h3 class="text-white font-bold text-base flex items-center gap-2">📐 Form Over Function</h3>
                     <p class="mt-2">
-                        Our citywide evaluation reveals a striking insight: <strong>0% of York's properties violate land-use compatibility rules.</strong> Multi-family homes, rowhouses, and neighborhood storefronts operate within legally permitted zoning boundaries. The friction is entirely geometric, not operational.
+                        Our citywide spatial evaluation reveals a profound insight: <strong>0% of York's properties are in violation of land-use compatibility rules.</strong> Multi-family homes, rowhouses, and neighborhood storefronts operate within legally permitted zoning boundaries. The friction is entirely geometric, not operational.
                     </p>
                 </div>
                 <div>
-                    <h3 class="text-white font-bold text-base flex items-center gap-2">🛑 The Geometric Housing Cap</h3>
+                    <h3 class="text-white font-bold text-base flex items-center gap-2">🛑 The Misallocated Capacity Gap</h3>
                     <p class="mt-2">
-                        While the modern code theoretically permits up to <strong id="stat-zoned-text">--,---</strong> total units citywide by allowing extreme density on a few commercial lots, it heavily restricts York's true residential fabric. In neighborhood zones, modern setback, area, and lot-coverage minimums make it illegal to replicate or build new traditional rowhouse footprints.
+                        While the raw code theoretically permits a high number of theoretical units citywide by allowing extreme density on a few downtown commercial lots, it heavily restricts York's true residential fabric. In neighborhood zones, modern setback, area, and lot-coverage minimums make it a violation to replicate traditional rowhouse footprints.
                     </p>
                 </div>
                 <div>
                     <h3 class="text-white font-bold text-base flex items-center gap-2">📈 Clashing with Household Growth</h3>
                     <p class="mt-2">
-                        As local housing demand scales upward by an estimated <strong>+1,200 households</strong>, modern suburban dimensional rules prevent existing residential blocks from organically adapting. Because building pedestrian-scaled housing densities is non-conforming, zoning acts as an invisible cap on supply where it is needed most.
+                        As local household demand scales upward by an estimated <strong>+1,200 households</strong>, modern zoning codes prevent the market from adapting. Because rebuilding rowhouses or adding multi-family density is structurally non-conforming, zoning acts as an invisible cap on supply, driving housing scarcity.
                     </p>
                 </div>
             </div>
@@ -66,22 +66,44 @@
     <main class="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-4 gap-6 -mt-10">
         
         <div class="lg:col-span-1 space-y-4">
+            
             <div class="bg-white p-5 rounded-2xl shadow-xs border border-slate-200">
-                <h2 class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">Isolate Dimensional Issues</h2>
+                <h2 class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">Select Analysis Layer</h2>
+                <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-xl">
+                    <button onclick="setMapMode('compliance')" id="mode-compliance" class="py-2.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition-all">
+                        Dimensional
+                    </button>
+                    <button onclick="setMapMode('capacity')" id="mode-capacity" class="py-2.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition-all">
+                        Net Capacity
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl shadow-xs border border-slate-200">
+                <h2 id="sidebar-toggle-title" class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">Isolate Geometric Conflicts</h2>
                 
-                <div class="space-y-2">
-                    <button onclick="switchView('overall')" id="btn-overall" class="w-full text-left px-4 py-3.5 rounded-xl font-bold text-sm transition-all bg-slate-900 text-white shadow-sm">
+                <div id="toggles-box" class="space-y-2">
+                    <button onclick="switchView('overall')" id="btn-overall" class="w-full text-left px-4 py-3 rounded-xl font-bold text-sm transition-all bg-slate-900 text-white shadow-sm">
                         🗺️ View All City Parcels
                     </button>
-                    <button onclick="switchView('setback')" id="btn-setback" class="w-full text-left px-4 py-3.5 rounded-xl font-medium text-sm transition-all bg-slate-100 text-slate-700 hover:bg-slate-200">
+                    <button onclick="switchView('setback')" id="btn-setback" class="w-full text-left px-4 py-3 rounded-xl font-medium text-sm transition-all bg-slate-100 text-slate-700 hover:bg-slate-200">
                         📐 Setback Infractions (<span id="stat-setback">--%</span>)
                     </button>
-                    <button onclick="switchView('coverage')" id="btn-coverage" class="w-full text-left px-4 py-3.5 rounded-xl font-medium text-sm transition-all bg-slate-100 text-slate-700 hover:bg-slate-200">
+                    <button onclick="switchView('coverage')" id="btn-coverage" class="w-full text-left px-4 py-3 rounded-xl font-medium text-sm transition-all bg-slate-100 text-slate-700 hover:bg-slate-200">
                         🏠 Yard Coverage Limits (<span id="stat-coverage">--%</span>)
                     </button>
-                    <button onclick="switchView('density')" id="btn-density" class="w-full text-left px-4 py-3.5 rounded-xl font-medium text-sm transition-all bg-slate-100 text-slate-700 hover:bg-slate-200">
-                        👥 Minimum Lot / Density Mandates (<span id="stat-density">--%</span>)
+                    <button onclick="switchView('density')" id="btn-density" class="w-full text-left px-4 py-3 rounded-xl font-medium text-sm transition-all bg-slate-100 text-slate-700 hover:bg-slate-200">
+                        👥 Minimum Lot Mandates (<span id="stat-density">--%</span>)
                     </button>
+                </div>
+                
+                <div id="capacity-info-text" class="hidden text-xs text-slate-500 leading-relaxed space-y-2 pt-2">
+                    <p>
+                        This layout displays the net unit gap between allowed zoning rules and existing housing units.
+                    </p>
+                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-red-500 block"></span> <b>Red (Deficit):</b> Zoning outlaws existing capacity.</div>
+                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-slate-300 block"></span> <b>Gray (Neutral):</b> Matches allowed limits.</div>
+                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-500 block"></span> <b>Green (Surplus):</b> Permits extra housing units.</div>
                 </div>
             </div>
 
@@ -113,9 +135,9 @@
                     <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Theoretical Capacity</div>
                     <div id="card-zoned" class="text-2xl font-black text-slate-800 mt-1">----</div>
                 </div>
-                <div class="bg-white p-4 rounded-2xl shadow-xs border border-slate-200 border-l-4 border-l-red-500">
+                <div class="bg-white p-4 rounded-2xl shadow-xs border border-slate-200 border-l-4 border-l-blue-500">
                     <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Geometric Illegality Rate</div>
-                    <div id="card-illegal" class="text-2xl font-black text-red-600 mt-1">--%</div>
+                    <div id="card-illegal" class="text-2xl font-black text-blue-600 mt-1">--%</div>
                 </div>
             </div>
 
@@ -127,6 +149,7 @@
 
     <script>
         let map = L.map('map').setView([39.9626, -76.7277], 14);
+        let mapMode = 'compliance'; // 'compliance' or 'capacity'
         let currentFilter = 'overall';
         let mapDataChunks = [];
         let legendControl;
@@ -135,7 +158,6 @@
             attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
         }).addTo(map);
 
-        // Crash-proof text helper function
         function safeSetText(id, text) {
             let el = document.getElementById(id);
             if (el) el.innerText = text;
@@ -149,15 +171,14 @@
                 safeSetText('stat-overall-header', overall.toFixed(1) + '%');
                 safeSetText('card-illegal', overall.toFixed(1) + '%');
                 
-                safeSetText('stat-zoned-text', (data.total_zoned_capacity || 0).toLocaleString());
-                
+                safeSetText('stat-deficit-header', (data.neighborhood_deficit || 0).toLocaleString());
                 safeSetText('card-built', (data.total_built_capacity || 0).toLocaleString());
                 safeSetText('card-zoned', (data.total_zoned_capacity || 0).toLocaleString());
                 
                 safeSetText('stat-setback', (data.pct_viol_setback || 0).toFixed(0) + '%');
                 safeSetText('stat-coverage', (data.pct_viol_coverage || 0).toFixed(0) + '%');
                 safeSetText('stat-density', (data.pct_viol_density || 0).toFixed(0) + '%');
-            }).catch(e => console.error("Metrics payload missing.", e));
+            }).catch(e => console.error("Metrics payload error.", e));
 
         function getWeight() {
             let z = map.getZoom();
@@ -166,34 +187,31 @@
             return 0.5;
         }
 
-        function getColor(props) {
-            if (currentFilter === 'overall') {
-                let s = props.SCORE || 0;
-                return s === 0 ? '#10b981' : 
-                       s === 1 ? '#fbbf24' : 
-                       s === 2 ? '#f97316' : '#ef4444';
-            }
-            return '#ef4444';
-        }
-
         function styleFeature(feature) {
             let props = feature.properties;
             
-            if (currentFilter !== 'overall') {
-                let activeViol = currentFilter === 'setback'  ? props.V_SETBACK :
-                                 currentFilter === 'coverage' ? props.V_COVERAGE : props.V_DENSITY;
-                if (activeViol != 1) {
-                    return { fillOpacity: 0, weight: 0, opacity: 0, clickable: false };
+            // MODE A: COMPLIANCE MAP RENDERING
+            if (mapMode === 'compliance') {
+                if (currentFilter !== 'overall') {
+                    let activeViol = currentFilter === 'setback'  ? props.V_SETBACK :
+                                     currentFilter === 'coverage' ? props.V_COVERAGE : props.V_DENSITY;
+                    if (activeViol != 1) {
+                        return { fillOpacity: 0, weight: 0, opacity: 0, clickable: false };
+                    }
                 }
+                let color = props.SCORE === 0 ? '#10b981' : 
+                            props.SCORE === 1 ? '#fbbf24' : 
+                            props.SCORE === 2 ? '#f97316' : '#ef4444';
+                return { fillColor: color, weight: getWeight(), opacity: 0.4, color: '#475569', fillOpacity: 0.7 };
             }
-
-            return {
-                fillColor: getColor(props),
-                weight: getWeight(),
-                opacity: 0.4,
-                color: '#475569',
-                fillOpacity: 0.7
-            };
+            
+            // MODE B: CAPACITY SURPLUS/DEFICIT VISUALIZATION RENDERING
+            else {
+                let capColor = props.CAP_STATUS === -1 ? '#ef4444' : // Red Deficit
+                               props.CAP_STATUS === 1  ? '#10b981' : // Green Surplus
+                               '#cbd5e1';                            // Gray Neutral
+                return { fillColor: capColor, weight: getWeight(), opacity: 0.4, color: '#475569', fillOpacity: 0.75 };
+            }
         }
 
         map.on('zoomend', function() {
@@ -206,12 +224,10 @@
                 <div class="text-xs p-1 font-sans text-slate-800">
                     <h4 class="font-bold border-b pb-1 mb-1 text-slate-900">FID Record ID: ${p.FID}</h4>
                     <b>Current Zoning District:</b> ${p.DISTRICT}<br/>
-                    <b>Registered Property Profile:</b> <span class="text-slate-600 font-medium">${p.USE_DESC}</span><br/>
-                    <b>Conflicting Geometric Codes:</b> ${p.SCORE}/3
+                    <b>Property Profile:</b> <span class="text-slate-600 font-medium">${p.USE_DESC}</span>
                     <hr class="my-1.5 border-slate-100"/>
-                    Setback Clearance: ${p.V_SETBACK ? '🔴 Non-conforming' : '🟢 Compliant'}<br/>
-                    Lot Yard Coverage: ${p.V_COVERAGE ? '🔴 Non-conforming' : '🟢 Compliant'}<br/>
-                    Minimum Lot Area/Density: ${p.V_DENSITY ? '🔴 Non-conforming' : '🟢 Compliant'}
+                    <b>Zoning Capacity Headroom:</b> ${p.NET_VAL > 0 ? '+' + p.NET_VAL : p.NET_VAL} units<br/>
+                    <span class="text-slate-400 text-[10px]">Setback: ${p.V_SETBACK ? '🔴' : '🟢'} | Coverage: ${p.V_COVERAGE ? '🔴' : '🟢'} | Density: ${p.V_DENSITY ? '🔴' : '🟢'}</span>
                 </div>
             `);
         }
@@ -222,15 +238,9 @@
                     let response = await fetch(`compliance_map_chunks/parcels_chunk_${chunkIndex}.geojson`);
                     if (!response.ok) break;
                     let chunkData = await response.json();
-                    let layer = L.geoJSON(chunkData, {
-                        style: styleFeature,
-                        onEachFeature: onEachFeature
-                    }).addTo(map);
-                    
+                    let layer = L.geoJSON(chunkData, { style: styleFeature, onEachFeature: onEachFeature }).addTo(map);
                     mapDataChunks.push(layer);
-                } catch (e) { 
-                    break; 
-                }
+                } catch (e) { break; }
             }
             updateLegendDisplay();
         }
@@ -241,23 +251,58 @@
             
             legendControl.onAdd = function () {
                 let div = L.DomUtil.create('div', 'legend');
-                if (currentFilter === 'overall') {
-                    div.innerHTML = `
-                        <h4 class="font-bold border-b pb-1 mb-1 text-slate-900">Geometric Conflicts</h4>
-                        <i style="background:#10b981"></i> Fully Compliant<br>
-                        <i style="background:#fbbf24"></i> 1 Code Infraction<br>
-                        <i style="background:#f97316"></i> 2 Code Infractions<br>
-                        <i style="background:#ef4444"></i> 3 Active Infractions
-                    `;
+                if (mapMode === 'compliance') {
+                    if (currentFilter === 'overall') {
+                        div.innerHTML = `
+                            <h4 class="font-bold border-b pb-1 mb-1 text-slate-900">Geometric Conflicts</h4>
+                            <i style="background:#10b981"></i> Fully Compliant<br>
+                            <i style="background:#fbbf24"></i> 1 Code Infraction<br>
+                            <i style="background:#f97316"></i> 2 Code Infractions<br>
+                            <i style="background:#ef4444"></i> 3 Active Infractions
+                        `;
+                    } else {
+                        div.innerHTML = `
+                            <i style="background:#ef4444"></i> Non-Conforming Property<br>
+                            <span class="text-slate-400 text-[10px] italic block mt-1">Compliant properties are hidden</span>
+                        `;
+                    }
                 } else {
                     div.innerHTML = `
-                        <i style="background:#ef4444"></i> Non-Conforming Property<br>
-                        <span class="text-slate-400 text-[10px] italic block mt-1">Compliant properties are hidden</span>
+                        <h4 class="font-bold border-b pb-1 mb-1 text-slate-900">Net Housing Headroom</h4>
+                        <i style="background:#ef4444"></i> Capacity Deficit (Outlawed)<br>
+                        <i style="background:#cbd5e1"></i> Balanced / Prohibited<br>
+                        <i style="background:#10b981"></i> Capacity Surplus Allowed
                     `;
                 }
                 return div;
             };
             legendControl.addTo(map);
+        }
+
+        function setMapMode(mode) {
+            mapMode = mode;
+            let compBtn = document.getElementById('mode-compliance');
+            let capBtn = document.getElementById('mode-capacity');
+            let togglesBox = document.getElementById('toggles-box');
+            let capText = document.getElementById('capacity-info-text');
+            let title = document.getElementById('sidebar-toggle-title');
+
+            if (mode === 'compliance') {
+                compBtn.className = "py-2.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition-all";
+                capBtn.className = "py-2.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition-all";
+                togglesBox.classList.remove('hidden');
+                capText.classList.add('hidden');
+                title.innerText = "Isolate Geometric Conflicts";
+            } else {
+                capBtn.className = "py-2.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition-all";
+                compBtn.className = "py-2.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition-all";
+                togglesBox.classList.add('hidden');
+                capText.classList.remove('hidden');
+                title.innerText = "Zoning Capacity Mapping";
+            }
+
+            mapDataChunks.forEach(layer => { layer.setStyle(styleFeature); });
+            updateLegendDisplay();
         }
 
         function switchView(metric) {
@@ -266,13 +311,11 @@
                 let btn = document.getElementById(`btn-${m}`);
                 if (btn) {
                     btn.className = m === metric ? 
-                        "w-full text-left px-4 py-3.5 rounded-xl font-bold text-sm transition-all bg-slate-900 text-white shadow-sm" : 
-                        "w-full text-left px-4 py-3.5 rounded-xl font-medium text-sm transition-all bg-slate-100 text-slate-700 hover:bg-slate-200";
+                        "w-full text-left px-4 py-3 rounded-xl font-bold text-sm transition-all bg-slate-900 text-white shadow-sm" : 
+                        "w-full text-left px-4 py-3 rounded-xl font-medium text-sm transition-all bg-slate-100 text-slate-700 hover:bg-slate-200";
                 }
             });
-
             mapDataChunks.forEach(layer => { layer.setStyle(styleFeature); });
-            updateLegendDisplay();
         }
 
         loadMapLayers();
