@@ -30,10 +30,10 @@
                 <div>
                     <h1 class="text-3xl font-black tracking-tight text-white sm:text-4xl">York, PA: Built vs. Zoned Capacity Analysis</h1>
                     <p class="text-slate-400 mt-2 max-w-3xl text-sm sm:text-base leading-relaxed">
-                        A spatial evaluation tracking the legal gap between York's existing built housing inventory and the maximum capacity allowed under current post-1970 suburban dimensional rules.
+                        A spatial evaluation tracking the legal gap between York's existing built housing inventory and the maximum capacity allowed under current suburban dimensional rules.
                     </p>
                 </div>
-                <div class="bg-red-500/10 border border-red-500/30 text-red-400 px-6 py-4 rounded-2xl min-w-[260px] shadow-inner text-center lg:text-left">
+                <div class="bg-red-500/10 border border-red-500/30 text-red-400 px-6 py-4 rounded-2xl min-w-[240px] shadow-inner text-center lg:text-left">
                     <span class="block text-xs uppercase font-bold tracking-widest text-slate-400">Total Capacity Deficit</span>
                     <span id="stat-deficit-header" class="text-4xl font-black tracking-tight">-,---</span>
                     <span class="block text-[10px] text-slate-400 mt-1">units eliminated from York's legal footprint</span>
@@ -67,7 +67,7 @@
         
         <div class="lg:col-span-1 space-y-4">
             <div class="bg-white p-5 rounded-2xl shadow-xs border border-slate-200">
-                <h2 class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">Isolate Capacity Squeezes</h2>
+                <h2 class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">Isolate Dimensional Issues</h2>
                 
                 <div class="space-y-2">
                     <button onclick="switchView('overall')" id="btn-overall" class="w-full text-left px-4 py-3.5 rounded-xl font-bold text-sm transition-all bg-slate-900 text-white shadow-sm">
@@ -104,7 +104,6 @@
         </div>
 
         <div class="lg:col-span-3 space-y-4">
-            
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div class="bg-white p-4 rounded-2xl shadow-xs border border-slate-200">
                     <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Existing Units Built</div>
@@ -140,26 +139,31 @@
             attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
         }).addTo(map);
 
-        // Fetch metrics safely out of summary stats file
+        // Fail-safe safe element hydration routine
+        function safeSetText(id, text) {
+            let el = document.getElementById(id);
+            if (el) el.innerText = text;
+        }
+
         fetch('summary_stats.json')
             .then(res => res.json())
             .then(data => {
                 let overall = data.pct_overall_illegal !== undefined ? data.pct_overall_illegal : 0;
-                document.getElementById('stat-overall-header').innerText = overall.toFixed(1) + '%';
-                document.getElementById('card-illegal').innerText = overall.toFixed(1) + '%';
                 
-                // Hydrate the new capacity metrics blocks
-                document.getElementById('stat-deficit-header').innerText = (data.capacity_deficit || 0).toLocaleString();
-                document.getElementById('stat-built-text').innerText = (data.total_built_capacity || 0).toLocaleString();
-                document.getElementById('stat-zoned-text').innerText = (data.total_zoned_capacity || 0).toLocaleString();
+                safeSetText('stat-overall-header', overall.toFixed(1) + '%');
+                safeSetText('card-illegal', overall.toFixed(1) + '%');
                 
-                document.getElementById('card-built').innerText = (data.total_built_capacity || 0).toLocaleString();
-                document.getElementById('card-zoned').innerText = (data.total_zoned_capacity || 0).toLocaleString();
+                safeSetText('stat-deficit-header', (data.capacity_deficit || 0).toLocaleString());
+                safeSetText('stat-built-text', (data.total_built_capacity || 0).toLocaleString());
+                safeSetText('stat-zoned-text', (data.total_zoned_capacity || 0).toLocaleString());
                 
-                document.getElementById('stat-setback').innerText = (data.pct_viol_setback || 0).toFixed(0) + '%';
-                document.getElementById('stat-coverage').innerText = (data.pct_viol_coverage || 0).toFixed(0) + '%';
-                document.getElementById('stat-density').innerText = (data.pct_viol_density || 0).toFixed(0) + '%';
-            }).catch(e => console.error("Metrics payload error.", e));
+                safeSetText('card-built', (data.total_built_capacity || 0).toLocaleString());
+                safeSetText('card-zoned', (data.total_zoned_capacity || 0).toLocaleString());
+                
+                safeSetText('stat-setback', (data.pct_viol_setback || 0).toFixed(0) + '%');
+                safeSetText('stat-coverage', (data.pct_viol_coverage || 0).toFixed(0) + '%');
+                safeSetText('stat-density', (data.pct_viol_density || 0).toFixed(0) + '%');
+            }).catch(e => console.error("Metrics payload missing.", e));
 
         function getWeight() {
             let z = map.getZoom();
